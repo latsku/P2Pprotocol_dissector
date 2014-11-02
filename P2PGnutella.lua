@@ -52,12 +52,27 @@ function p2pgnutella_proto.dissector(buffer,pinfo,tree)
     headertree:add(f.pf_orig_ip, buffer(8,4))
     headertree:add(buffer(12,4),"Message Id: " .. buffer(12,4):uint())
 
+    local msgtype = buffer(2,1):uint()
+
+    if ( msgtype == 0x00 ) then
+        pinfo.cols.info:set("Ping, TTL: " .. buffer(1,1):uint())
+    elseif ( msgtype == 0x01 ) then
+        pinfo.cols.info:set("Pong")
+    elseif ( msgtype == 0x02 ) then
+        pinfo.cols.info:set("Bye")
+    elseif ( msgtype == 0x03 ) then
+        pinfo.cols.info:set("Join")
+    elseif ( msgtype == 0x80 ) then
+        pinfo.cols.info:set("Query")
+    elseif ( msgtype == 0x81 ) then
+        pinfo.cols.info:set("Query Hit")
+    end
+
     --Body
     local payloadlength = buffer(6,2):uint()
     if (((pinfo.len-66-16) > 0) and (payloadlength > 0)) then
         local bodytree = subtree:add(buffer(16,(pinfo.len-66-16)),"Body")
-        local msgtype = buffer(2,1)
-        if msgtype:uint() == 0x01 then
+        if msgtype == 0x01 then
             bodytree:add(buffer(16,2), "Entry size: " .. buffer(16,2):uint())
             local entrysize = buffer(16,2):uint()
             if entrysize >= 1 then
@@ -66,13 +81,18 @@ function p2pgnutella_proto.dissector(buffer,pinfo,tree)
                     bodytree:add(f.pf_peer_port, buffer((24+i*8),2))
                 end
             end
-        elseif msgtype:uint() == 0x03 then
+        elseif msgtype == 0x03 then
+            if buffer(16,2):uint() == 0x200 then
+                pinfo.cols.info:append(", Accepted")
+            end
             bodytree:add(f.pf_join_status, buffer(16,2))
-        elseif msgtype:uint() == 0x80 then
+        elseif msgtype == 0x80 then
+            pinfo.cols.info:append(", key: " .. buffer(16, (pinfo.len-66-16)):string())
             bodytree:add(f.pf_query, buffer(16, (pinfo.len-66-16)))
-        elseif msgtype:uint() == 0x81 then
-            bodytree:add(buffer(16,2), "Entry size: " .. buffer(16,2):uint())
+        elseif msgtype == 0x81 then
             local entrysize = buffer(16,2):uint()
+            pinfo.cols.info:append(", " .. entrysize .. " entries" )
+            bodytree:add(buffer(16,2), "Entry size: " .. buffer(16,2):uint())
             if entrysize >= 1 then
                 for i = 0, entrysize-1, 1 do
                     bodytree:add(f.pf_query_rid, buffer((20+i*8),2))

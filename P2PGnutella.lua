@@ -27,15 +27,15 @@ local join_enum = { [512] = "Accept" }
 
 -- Protocol fields
 local f = p2pgnutella_proto.fields
-f.pf_msg_type         = ProtoField.uint8("p2pgnutella_proto.msg.type", "Msg type", base.HEX, msgtype_enum)
-f.pf_msg_port         = ProtoField.uint16("p2pgnutella_proto.msg.port", "Sender Port", base.DEC)
-f.pf_orig_ip          = ProtoField.ipv4 ("p2pgnutella_proto.msg.ip", "Original Sender IP")
-f.pf_query            = ProtoField.stringz("p2pgnutella_proto.msg.query", "Query")
-f.pf_query_rid        = ProtoField.uint16("p2pgnutella_proto.msg.queryhit.rid", "Resource ID", base.DEC)
-f.pf_query_value      = ProtoField.uint32("p2pgnutella_proto.msg.queryhit.value", "Value", base.DEC)
-f.pf_peer             = ProtoField.ipv4("p2pgnutella_proto.msg.discovery.peer", "Peer")
-f.pf_peer_port        = ProtoField.uint16("p2pgnutella_proto.msg.discovery.peerport", "Peer port", base.DEC)
-f.pf_join_status      = ProtoField.uint16("p2pgnutella_proto.msg.join.status", "Status", base.HEX, join_enum)
+f.pf_msg_type         = ProtoField.uint8("p2p_gnutella.type", "Msg type", base.HEX, msgtype_enum)
+f.pf_msg_port         = ProtoField.uint16("p2p_gnutella.senderport", "Sender Port", base.DEC)
+f.pf_orig_ip          = ProtoField.ipv4 ("p2p_gnutella.orig_ip", "Original Sender IP")
+f.pf_query            = ProtoField.stringz("p2p_gnutella.query", "Query")
+f.pf_query_rid        = ProtoField.uint16("p2p_gnutella.queryhit.rid", "Resource ID", base.DEC)
+f.pf_query_value      = ProtoField.uint32("p2p_gnutella.queryhit.value", "Value", base.DEC)
+f.pf_peer             = ProtoField.ipv4("p2p_gnutella.discovery.peer", "Peer")
+f.pf_peer_port        = ProtoField.uint16("p2p_gnutella.discovery.peerport", "Peer port", base.DEC)
+f.pf_join_status      = ProtoField.uint16("p2p_gnutella.join.status", "Status", base.HEX, join_enum)
 
 -- Dissect function
 function p2pgnutella_proto.dissector(buffer,pinfo,tree)
